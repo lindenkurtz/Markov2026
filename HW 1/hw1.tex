@@ -1,0 +1,353 @@
+\documentclass[11pt]{article}
+
+% ---------- packages ----------
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}      % nice tables
+\usepackage{enumitem}      % control over (a), (b), ...
+\usepackage{siunitx}       % \num{} for consistent sig figs
+\usepackage[colorlinks=true, urlcolor=blue]{hyperref}
+
+% ---------- shortcuts ----------
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\indep}{\perp\!\!\!\perp}
+\newcommand{\dd}{\,\mathrm{d}}
+
+% consistent rounding: \num[round-mode=figures,round-precision=4]{0.1234567}
+\sisetup{round-mode=figures, round-precision=4}
+
+\title{Markov Processes: Homework 1}
+\author{Linden Kurtz}
+\date{Due September 2, 2026}
+
+\begin{document}
+\maketitle
+
+\noindent
+GitHub account: \texttt{lindenkurtz} \\
+Repository: \url{https://github.com/lindenkurtz/Markov2026} \\
+Handwritten notes can also be found in this repo.
+
+\section*{Problem 1: Joint distributions}
+
+\begin{enumerate}[label=(\alph*)]
+  \item
+  Due to the nature of probability distributions, $\int_0^2\!\!\int_0^1 K(x^2+y)\dd x \dd y = 1$.
+  \begin{align}
+    \int_0^1\!\!\int_0^2 x^2\dd y \dd x + \int_0^1\!\!\int_0^2 y\dd y \dd x &= \tfrac{1}{K}, \\
+    \int_0^1 2x^2 \dd x + \int_0^1 2 \dd x &= \tfrac{1}{K}, \\
+    \tfrac{2}{3} + 2 &= \tfrac{1}{K}
+  \end{align}
+  Therefore $K = \tfrac{3}{8}$.
+
+  \item
+  The marginal of $X$ is $f_X(x) = \int_0^2 f(x,y)\dd y$ for $0 \le x \le 1$, and zero otherwise.
+  \[
+    f_X(x) = \int_0^2 \tfrac{3}{8} (x^2 + y)\dd y = \tfrac{3}{4}x^2+\tfrac{3}{4}
+  \]
+  As a check, $\int_0^1 f_X(x)\dd x = \int_0^1 \tfrac{3}{4}x^2+\tfrac{3}{4}\dd x = 1$. \\ \\
+  Similarly, the marginal of $Y$ is $f_Y(y) = \int_0^1 f(x,y)\dd x$ for $0 \le y \le 2$, and zero otherwise.
+  \[
+    f_Y(y) = \int_0^1 \tfrac{3}{8} (x^2 + y)\dd x = \tfrac{1}{8}+\tfrac{3}{8}y
+  \]
+  As a check, $\int_0^2 f_Y(y)\dd y = \int_0^2 \tfrac{1}{8}+\tfrac{3}{8}y\dd y = 1$.
+
+  \item
+  $X$ and $Y$ are independent if and only if $f(x,y) = f_X(x)f_Y(y)$ for all $(x,y)$.
+  Comparing the two expressions,
+  \begin{align}
+    f_X(x)f_Y(y) &= (\tfrac{3}{4}x^2 + \tfrac{3}{4})(\tfrac{1}{8}+\tfrac{3}{8}y), \\
+    &= \tfrac{3}{32}x^2 + \tfrac{9}{32}x^2 y + \tfrac{3}{32} + \tfrac{9}{32}y, \\
+    &\not= f(x,y) = \tfrac{3}{8}(x^2 + y)
+  \end{align}
+  So $X$ and $Y$ are not independent.
+\end{enumerate}
+
+\section*{Problem 2: Moment generating function 1}
+
+\begin{enumerate}[label=(\alph*)]
+  \item Given $X \sim \text{Geometric}(q)$ counting misses, so $\Prob(X = x) = (1-q)^x q$. Therefore, the MGF is given by:
+  \begin{align}
+    M_X(s) &= \E[e^{Xs}], \\
+    &= \sum_{x=0}^{\infty} e^{xs}(1-q)^x q, \\
+    &= q \sum_{x=0}^{\infty} (e^s (1-q))^x
+  \end{align}
+  Assuming that $e^s(1-q) < 1$, or $e^s < \tfrac{1}{1-q}$,
+  \[
+    M_X(s) = \frac{q}{1-e^s(1-q)}
+  \]
+  And the MGF is finite for $s < \ln(\tfrac{1}{1-q})$.
+
+  \item Differentiating at $s=0$:
+  \begin{align}
+    M_X'(s) &= \frac{q(1-q)e^s}{(1-e^s(1-q))^2}, \\
+    M_X'(0) &= \frac{1-q}{q}, \\
+    M_X''(s) &= \frac{(1-e^s(1-q))^2(q(1-q)e^s) + 2(q(1-q)e^s)(1-e^s(1-q))(1-q)e^s}{(1-e^s(1-q))^4}, \\
+    M_X''(0) &= \frac{(1-q)(q+2(1-q))}{q^2}, \\
+    \E[X] &= M_X'(0) = \frac{1-q}{q}, \\
+    \Var(X) &= M_X''(0) - (M_X'(0))^2 = \frac{1-q}{q^2}
+  \end{align}
+
+  \item Fix an integer $k \ge 0$. Writing the conditional MGF of $X-k$ as an expectation and using
+  $\E[g(X)] = \sum_x g(x)\Prob(X=x)$,
+  \begin{align}
+    M_{X-k \mid X \ge k}(s) &= \E\!\left[e^{s(X-k)} \mid X \ge k\right], \\
+    &= \sum_{n=k}^{\infty} e^{s(n-k)}\,\Prob(X = n \mid X \ge k), \\
+    &= \sum_{n=k}^{\infty} e^{s(n-k)}\,\frac{\Prob(X=n \cap X \ge k)}{\Prob(X \ge k)}
+  \end{align}
+  Every $n$ in this summation already satisfies $n \ge k$, so the event $\{X = n \cap X \ge k\}$
+  is just $\{X = n\}$, and $\Prob(X \ge k) = (1-q)^k$. Therefore
+  \begin{align}
+    M_{X-k \mid X \ge k}(s) &= \sum_{n=k}^{\infty} e^{s(n-k)}\,\frac{(1-q)^n q}{(1-q)^k}, \\
+    &= \frac{q\,e^{-sk}}{(1-q)^k}\sum_{n=k}^{\infty} \left(e^s(1-q)\right)^n, \\
+    &= \frac{q\,e^{-sk}}{(1-q)^k}\cdot\frac{\left(e^s(1-q)\right)^k}{1-e^s(1-q)}, \\
+    &= \frac{q}{1-e^s(1-q)} \;=\; M_X(s)
+  \end{align}
+  Since the MGF determines the distribution, this means that the number of further misses for a
+  player who has already missed $k$ shots has the same distribution as if they had shot no shots at
+  all. 
+
+  \item Let $T_r = \sum_{i=1}^{r} X_i$, where the $X_i$ are i.i.d.\ random variables with the same
+  distribution as $X$. Since the $X_i$ are independent, the MGF of the sum is the product of the MGFs:
+  \begin{align}
+    M_{T_r}(s) &= \left(M_X(s)\right)^r = \left(\frac{q}{1-e^s(1-q)}\right)^{r}
+  \end{align}
+  This is the MGF of a negative binomial distribution counting the number of misses before the $r$th
+  make, with success probability $q$ and $r$ successes. Differentiating,
+  \begin{align}
+    M_{T_r}'(s) &= r\left(q(1-e^s(1-q))^{-1}\right)^{r-1}\cdot\frac{q(1-q)e^s}{(1-e^s(1-q))^2}, \\
+    M_{T_r}'(0) &= r(1)^{r-1}\cdot\frac{1-q}{q}, \\
+    \E[T_r] &= \frac{r(1-q)}{q}
+  \end{align}
+  and for the second moment,
+  \begin{align}
+    M_{T_r}''(0) &= r\cdot\frac{(1-q)(q+2(1-q))}{q^2}
+      + \frac{1-q}{q}\cdot\frac{r(r-1)(1-q)}{q}, \\
+    &= \frac{r(1-q)(q+2(1-q)) + r(r-1)(1-q)^2}{q^2}
+  \end{align}
+  so that
+  \begin{align}
+    \Var(T_r) &= \frac{r(1-q)(q+2(1-q)) + r(r-1)(1-q)^2}{q^2} - \frac{r^2(1-q)^2}{q^2}, \\
+    &= \frac{r(1-q)\big(-q+2+(r-1)(1-q)-r(1-q)\big)}{q^2}, \\
+    &= \frac{r(1-q)\big(-q+2+r-rq-1+q-r+rq\big)}{q^2}, \\
+    &= \frac{r(1-q)}{q^2}
+  \end{align}
+  Both the mean and the variance are exactly $r$ times the corresponding quantities for a single $X$,
+  which is what a sum of $r$ independent copies should give.
+\end{enumerate}
+
+\section*{Problem 3: Mixtures and conditioning}
+
+Let $\theta \sim \text{Uniform}[0,1]$ and $X \mid \theta \sim \text{Exponential}(\theta)$.
+The joint density follows from $f_{X\mid\theta}(x\mid\theta) = f_{X,\theta}(x,\theta)/f_\theta(\theta)$:
+\begin{align}
+  f_{X,\theta}(x,\theta) &= f_{X\mid\theta}(x\mid\theta)\,f_\theta(\theta), \\
+  &= \theta e^{-\theta x}\cdot 1, \qquad 0 < \theta \le 1,\ x > 0
+\end{align}
+So, every $0 < \theta \le 1$ contributes to any given $x$. \\
+
+Marginalizing over $\theta$ and integrating by parts with $u = \theta$ and $v' = e^{-\theta x}$
+(so $u' = 1$ and $v = -\tfrac{1}{x}e^{-\theta x}$),
+\begin{align}
+  f_X(x) &= \int_0^1 \theta e^{-\theta x}\dd \theta, \\
+  &= \left[-\frac{\theta}{x}e^{-\theta x}\right]_0^1 + \int_0^1 \frac{1}{x}e^{-\theta x}\dd\theta, \\
+  &= \left(-\frac{\theta}{x}e^{-\theta x} - \frac{1}{x^2}e^{-\theta x}\right)\Bigg|_0^1, \\
+  &= \left(-\frac{1}{x}e^{-x} - \frac{1}{x^2}e^{-x}\right) - \left(0 - \frac{1}{x^2}\right), \\
+  &= \frac{1}{x^2} - e^{-x}\left(\frac{1}{x} + \frac{1}{x^2}\right), \qquad x > 0
+\end{align}
+
+For the expected value:
+\begin{align}
+  \E[X] = \E\big[\E[X \mid \theta]\big] = \E\!\left[\frac{1}{\theta}\right]
+  = \int_0^1 \frac{1}{\theta}\dd\theta = \infty
+\end{align}
+so $\E[X]$ is not finite. This aligns with the result from taking the expected value of $f_X(x)$ directly, since an integrand of $\tfrac{1}{x}$ diverges.
+
+\section*{Problem 4: Moment generating function 2}
+
+\begin{enumerate}[label=(\alph*)]
+  \item Let $X \sim \text{Exponential}(\lambda)$ with $f(x) = \lambda e^{-\lambda x}$ for $x \ge 0$.
+  \begin{align}
+    M_X(s) &= \E[e^{sX}], \\
+    &= \int_0^\infty e^{sx}\lambda e^{-\lambda x}\dd x, \\
+    &= \lambda \int_0^\infty e^{x(s-\lambda)}\dd x
+  \end{align}
+  Assuming $s < \lambda$, so that the exponent is negative and the integral converges,
+  \begin{align}
+    M_X(s) &= \lambda\left(\frac{1}{s-\lambda}e^{x(s-\lambda)}\right)\Bigg|_0^\infty
+    = \lambda\left(0 - \frac{1}{s-\lambda}\right) = \frac{-\lambda}{s-\lambda}
+  \end{align}
+  so the MGF is finite for $s < \lambda$. Differentiating,
+  \begin{align}
+    M_X'(s) &= \frac{\lambda}{(s-\lambda)^2}, & M_X'(0) &= \frac{\lambda}{\lambda^2} = \frac{1}{\lambda} = \E[X], \\
+    M_X''(s) &= \frac{-2\lambda}{(s-\lambda)^3}, & M_X''(0) &= \frac{2}{\lambda^2},
+  \end{align}
+  and therefore $\Var(X) = \dfrac{2}{\lambda^2} - \dfrac{1}{\lambda^2} = \dfrac{1}{\lambda^2}$.
+
+  \item Let $S_n = X_1 + \dots + X_n$ with $X_i$ i.i.d.\ $\text{Exponential}(\lambda)$. By independence,
+  \begin{align}
+    M_{S_n}(s) &= \left(\frac{-\lambda}{s-\lambda}\right)^{n}, \\
+    M_{S_n}'(s) &= n\left(\frac{-\lambda}{s-\lambda}\right)^{n-1}\cdot\frac{\lambda}{(s-\lambda)^2}, \\
+    M_{S_n}'(0) &= n(1)^{n-1}\cdot\frac{1}{\lambda} = \frac{n}{\lambda} = \E[S_n], \\
+    M_{S_n}''(s) &= n(n-1)\left(\frac{-\lambda}{s-\lambda}\right)^{n-2}\cdot\frac{\lambda}{(s-\lambda)^2}\cdot\frac{\lambda}{(s-\lambda)^2}
+      + n\left(\frac{-\lambda}{s-\lambda}\right)^{n-1}\cdot\frac{-2\lambda}{(s-\lambda)^3}, \\
+    M_{S_n}''(0) &= n(n-1)\cdot\frac{1}{\lambda^2} + n\cdot\frac{2}{\lambda^2}
+      = \frac{n(n-1)+2n}{\lambda^2} = \frac{n(n+1)}{\lambda^2}, \\
+    \Var(S_n) &= \frac{n(n+1)}{\lambda^2} - \frac{n^2}{\lambda^2} = \frac{n}{\lambda^2}
+  \end{align}
+  This MGF is that of a gamma distribution with shape $n$ and rate $\lambda$, so the total waiting
+  time for $n$ exponential events is $\text{Gamma}(n, \lambda)$.
+\end{enumerate}
+
+\section*{Problem 5: Luck, Skill, and Upsets}
+
+\begin{enumerate}[label=(\alph*)]
+  \item With $\sigma(\beta s) = \dfrac{1}{1+e^{-\beta s}}$ and $\beta > 0$, the match is a coin flip with
+  probability $\alpha$ and decided by skill otherwise, so
+  \begin{align}
+    f(s) &= \alpha\left(\tfrac{1}{2}\right) + (1-\alpha)\sigma(\beta s)
+    = \frac{\alpha}{2} + (1-\alpha)\left(\frac{1}{1+e^{-\beta s}}\right)
+  \end{align}
+  Replacing $s$ with $-s$ and multiplying through by $e^{-\beta s}/e^{-\beta s}$,
+  \begin{align}
+    f(-s) &= \frac{\alpha}{2} + (1-\alpha)\left(\frac{1}{1+e^{\beta s}}\right)\cdot\frac{e^{-\beta s}}{e^{-\beta s}}, \\
+    &= \frac{\alpha}{2} + (1-\alpha)\left(\frac{e^{-\beta s}}{1+e^{-\beta s}}\right), \\
+    &= \frac{\alpha}{2} + (1-\alpha)\left(\frac{1+e^{-\beta s}}{1+e^{-\beta s}} - \frac{1}{1+e^{-\beta s}}\right), \\
+    &= \frac{\alpha}{2} + (1-\alpha) - (1-\alpha)\left(\frac{1}{1+e^{-\beta s}}\right), \\
+    &= 1 - \frac{\alpha}{2} - (1-\alpha)\left(\frac{1}{1+e^{-\beta s}}\right) = 1 - f(s)
+  \end{align}
+  For the limits,
+  \begin{align}
+    \lim_{s\to\infty} f(s) &= \frac{\alpha}{2} + (1-\alpha) = 1 - \frac{\alpha}{2}, &
+    \lim_{s\to-\infty} f(s) &= \frac{\alpha}{2}
+  \end{align}
+  As player $i$ gets infinitely better than player $j$, the chance he wins approaches $1$ minus the
+  chance the game is determined by luck and lost on the coin flip. As player $i$ gets infinitely
+  worse, the only way he wins is on the coin flip, so his chance of winning is the chance the game is
+  determined by luck times one half.
+
+  \item With $\alpha = 0.2$, $\beta = 1$, and $s = 2$,
+  \begin{align}
+    \Prob(i \text{ wins}) &= f(2) = \frac{0.2}{2} + (1-0.2)\left(\frac{1}{1+e^{-2}}\right)
+    = \frac{1}{10} + \frac{4}{5}\left(\frac{1}{1+e^{-2}}\right) \approx \num{0.8046}
+  \end{align}
+  For a \$1 wager at even odds the bettor receives \$2 on a win and nothing on a loss, so with
+  $W$ the amount returned,
+  \begin{align}
+    \E[W] &= 2\,\Prob(i \text{ wins}) + 0\cdot\left(1 - \Prob(i \text{ wins})\right)
+    = 2(\num{0.8046}) \approx \num{1.609}
+  \end{align}
+  That figure includes the \$1 that was staked, so the expected net return is
+  $\num{1.609} - 1 \approx \$\num{0.6092}$ per game. Finally, letting $C$ be the event that the coin
+  decided the match, we have $\Prob(C) = 0.2$ and
+  $\Prob(j \text{ wins}) = 1 - \num{0.8046} \approx \num{0.1954}$, so Bayes' theorem gives
+  \begin{align}
+    \Prob(C \mid j \text{ wins}) &= \frac{\Prob(j \text{ wins} \mid C)\,\Prob(C)}{\Prob(j \text{ wins})}
+    = \frac{(0.5)(0.2)}{\num{0.1954}} \approx \num{0.5119}
+  \end{align}
+
+  \item Let $E$ be the event that the weaker player won and $F$ the event that the match was decided
+  by the coin, with $s > 0$. Then
+  \begin{align}
+    \Prob(E) &= 1 - f(s) = \frac{\alpha}{2} + (1-\alpha)\frac{1}{1+e^{\beta s}}, \\
+    \Prob(F) &= \alpha, \\
+    \Prob(E \mid F) &= \frac{1}{2}
+  \end{align}
+  The two events are independent exactly when $\Prob(E \mid F) = \Prob(E)$, so $\alpha$ and $s$ must
+  be chosen so that $\Prob(E) = \tfrac{1}{2}$:
+  \begin{align}
+    \frac{1}{2} &= \frac{\alpha}{2} + (1-\alpha)\frac{1}{1+e^{\beta s}}, \\
+    0 &= \frac{\alpha-1}{2} + (1-\alpha)\frac{1}{1+e^{\beta s}}, \\
+    0 &= (1+e^{\beta s})(\alpha-1) + 2(1-\alpha), \\
+    &= \alpha + \alpha e^{\beta s} - 1 - e^{\beta s} + 2 - 2\alpha, \\
+    0 &= -\alpha + \alpha e^{\beta s} - e^{\beta s} + 1, \\
+    0 &= (\alpha - 1)\left(e^{\beta s} - 1\right)
+  \end{align}
+  The product vanishes when $\alpha = 1$ or when $s = 0$, but since the problem fixes $s > 0$, the
+  second root is unavailable and we only take $\alpha = 1$. So $E$ and $F$ are independent when $(\alpha, s) = (1, s)$ with $s > 0$, and are dependent for every other pair.
+
+  \item Expanding $f$ about $s = 0$ with the Maclaurin series
+  $f(s) = \sum_{i=0}^{\infty} \frac{f^{(i)}(0)}{i!}s^i$:
+  \begin{align}
+    f(0) &= \frac{1}{2}, \\
+    f'(s) &= -(1-\alpha)\frac{1}{(1+e^{-\beta s})^2}\cdot\left(-\beta e^{-\beta s}\right)
+      = (1-\alpha)\frac{\beta e^{-\beta s}}{(1+e^{-\beta s})^2}, \\
+    f'(0) &= (1-\alpha)\frac{\beta}{4}
+  \end{align}
+  and for the second derivative,
+  \begin{align}
+    f''(s) &= (1-\alpha)\frac{(1+e^{-\beta s})^2\left(-\beta^2 e^{-\beta s}\right)
+      - \beta e^{-\beta s}\cdot 2(1+e^{-\beta s})\left(-\beta e^{-\beta s}\right)}{(1+e^{-\beta s})^4}, \\
+    &= (1-\alpha)\frac{-\beta^2 e^{-\beta s}(1+e^{-\beta s}) + 2\beta^2 e^{-2\beta s}}{(1+e^{-\beta s})^3}, \\
+    &= (1-\alpha)\frac{\beta^2 e^{-\beta s}\left(e^{-\beta s} - 1\right)}{(1+e^{-\beta s})^3}, \\
+    f''(0) &= 0
+  \end{align}
+  The quadratic term vanishes, so
+  \begin{align}
+    f(s) &= \frac{1}{2} + (1-\alpha)\frac{\beta}{4}\,s + O(s^3)
+  \end{align}
+  A luck factor $\alpha$ doesn't play a large role across a
+  large number of evenly matched games becuase as $s \to 0$, the terms containing $\alpha$ also go to zero, and the only major term remaining is 
+  constant $\tfrac{1}{2}$, which doesn't depend on $\alpha$.
+
+  As $s$ increases or decreases, the luck factor $\alpha$ becomes more influential, eventually being
+  the only parameter that matters as $s \to \pm\infty$. So, more lopsided matches break this tie.
+\end{enumerate}
+
+\section*{Problem 6: Simulation Assignment 1: Coupled Inequalities}
+
+\begin{enumerate}[label=(\alph*)]
+  \item
+  Let $X, Y, Z$ be independent $\text{Uniform}[0,1]$. The two conditions are $X^2 + Y^2 < Z$ and
+  $Z^2 > XY$. Since both are lower bounds
+  on $z$ with no upper bound other than $z \le 1$, so the region is the set of points lying above
+  whichever of the two surfaces is larger.
+
+  Working in cylindrical coordinates with $x = r\cos\theta$, $y = r\sin\theta$ and
+  $\theta \in [0, \tfrac{\pi}{2}]$ (since $x, y \ge 0$), the two bounds become
+  \begin{align}
+    z > r^2, \qquad z > \sqrt{r^2\cos\theta\sin\theta} = r\,\frac{\sqrt{\sin(2\theta)}}{\sqrt{2}}
+  \end{align}
+  They exchange dominance where $r^2 = r\sqrt{\cos\theta\sin\theta}$, that is at
+  \begin{align}
+    r^*(\theta) = \sqrt{\cos\theta\sin\theta} = \frac{\sqrt{\sin(2\theta)}}{\sqrt{2}}
+  \end{align}
+  For $r > r^*$ the parabolic bound $r^2$ is the larger one, and for $r < r^*$ the $\sqrt{xy}$ bound
+  is. Splitting the radial integral at $r^*$ and including the Jacobian $r$,
+  \begin{align}
+    P &= \int_0^{\pi/2}\!\!\int_{\frac{\sqrt{\sin 2\theta}}{\sqrt{2}}}^{1}\!\!\int_{r^2}^{1} r \dd z \dd r \dd\theta
+      + \int_0^{\pi/2}\!\!\int_{0}^{\frac{\sqrt{\sin 2\theta}}{\sqrt{2}}}\!\!
+        \int_{r\frac{\sqrt{\sin 2\theta}}{\sqrt{2}}}^{1} r \dd z \dd r \dd\theta, \\
+    &= \int_0^{\pi/2}\!\!\int_{\frac{\sqrt{\sin 2\theta}}{\sqrt{2}}}^{1} \left(r - r^3\right) \dd r \dd\theta
+      + \int_0^{\pi/2}\!\!\int_{0}^{\frac{\sqrt{\sin 2\theta}}{\sqrt{2}}}
+        \left(r - r^2\frac{\sqrt{\sin 2\theta}}{\sqrt{2}}\right) \dd r \dd\theta
+  \end{align}
+  Carrying out the radial integrals,
+  \begin{align}
+    P &= \int_0^{\pi/2}\left[\left(\frac{1}{2}-\frac{1}{4}\right)
+      - \left(\frac{\sin(2\theta)}{4} - \frac{\sin^2(2\theta)}{16}\right)\right]\dd\theta
+      + \int_0^{\pi/2}\left[\frac{\sin(2\theta)}{4} - \frac{\sin^2(2\theta)}{12}\right]\dd\theta
+  \end{align}
+  Using $\sin^2(2\theta) = \tfrac{1}{2}\left(1-\cos(4\theta)\right)$ and clearing denominators,
+  \begin{align}
+    P &= \int_0^{\pi/2}\frac{\frac{1-\cos(4\theta)}{2} - 4\sin(2\theta) + 4}{16}\dd\theta
+      + \int_0^{\pi/2}\frac{3\sin(2\theta) - \frac{1-\cos(4\theta)}{2}}{12}\dd\theta, \\
+    &= \int_0^{\pi/2}\frac{-\cos(4\theta) - 8\sin(2\theta) + 9}{32}\dd\theta
+      + \int_0^{\pi/2}\frac{6\sin(2\theta) - 1 + \cos(4\theta)}{24}\dd\theta
+  \end{align}
+  Evaluating the integrals results in:
+  \begin{align}
+    P &= \left(\frac{-\sin(4\theta)}{128} + \frac{\cos(2\theta)}{8} + \frac{9\theta}{32}\right)\Bigg|_0^{\pi/2}
+      + \left(\frac{-\cos(2\theta)}{8} - \frac{\theta}{24} + \frac{\sin(4\theta)}{96}\right)\Bigg|_0^{\pi/2}, \\
+    &= \left(0 + \frac{-1}{8} + \frac{9\pi}{64}\right) - \frac{1}{8}
+      + \left(\frac{1}{8} - \frac{\pi}{48}\right) + \frac{1}{8}, \\
+    &= \frac{9\pi}{64} - \frac{\pi}{48} = \frac{23\pi}{192} \approx \num{0.3763}
+  \end{align}
+  So the probability that both inequalities hold is $\tfrac{23\pi}{192} \approx \num{0.3763}$.
+\end{enumerate}
+
+\end{document}
