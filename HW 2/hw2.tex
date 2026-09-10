@@ -4,6 +4,7 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath, amssymb, amsthm}
 \usepackage{graphicx}      % figures
+\usepackage{subcaption}    % side-by-side figures
 \usepackage{booktabs}      % nice tables
 \usepackage{enumitem}      % control over (a), (b), ...
 \usepackage{siunitx}       % \num{} for consistent sig figs
@@ -203,16 +204,19 @@ Repository: \url{https://github.com/lindenkurtz/Markov2026}
 
     \begin{figure}[ht]
         \centering
-        \includegraphics[width=0.72\textwidth]{problem_3_lam=0.5.png}
-        \caption{$\lambda = 1/2$: normalized histogram of $10^4$ accepted samples with $f(x)$ and the
-        envelope $c\,g(x)$ overlaid. Bin width = 0.1603}
-    \end{figure}
-
-    \begin{figure}[ht]
-        \centering
-        \includegraphics[width=0.72\textwidth]{problem_3_lam=0.2.png}
-        \caption{$\lambda = 0.2$: normalized histogram of $10^4$ accepted samples with $f(x)$ and the
-        envelope $c\,g(x)$ overlaid. Bin width = 0.1617}
+        \begin{subfigure}[t]{0.48\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{problem_3_lam=0.5.png}
+            \caption{$\lambda = 1/2$: normalized histogram of $10^4$ accepted samples with $f(x)$ and the
+            envelope $c\,g(x)$ overlaid. Bin width = 0.1603}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[t]{0.48\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{problem_3_lam=0.2.png}
+            \caption{$\lambda = 0.2$: normalized histogram of $10^4$ accepted samples with $f(x)$ and the
+            envelope $c\,g(x)$ overlaid. Bin width = 0.1617}
+        \end{subfigure}
     \end{figure}
 
     When \(\lambda = 0.5\), the empirical acceptence is higher and the time per accepted sample is
@@ -221,8 +225,6 @@ Repository: \url{https://github.com/lindenkurtz/Markov2026}
     higher, since more iterations are being spent per accept-reject loop.
 
 \end{enumerate}
-
-\penalty-10000
 
 \section*{Problem 4: Ion channel dwell times and mixture sampling}
 
