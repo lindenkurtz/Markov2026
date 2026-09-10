@@ -2,7 +2,7 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-rng = np.random.default_rng()
+rng = np.random.default_rng(5)
 
 def c_value(lam):
     return -1 / (lam * (lam - 1) * np.exp(1))
