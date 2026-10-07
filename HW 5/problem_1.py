@@ -42,7 +42,7 @@ for i in range(1, 400):
 err = np.max(np.abs(Q2 - pi2), axis=1)
 n_star = np.argmax(err < 1e-6)
 
-eig = np.linalg.eigvals(p)
+eig = np.linalg.eigvals(p2)
 moduli = np.sort(np.abs(eig))[::-1]
 
 print(f'c) smallest n: {n_star}')
